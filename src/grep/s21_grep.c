@@ -6,6 +6,7 @@ int main(int argc, char **argv) {
   int count_templates = 0;
   for (int i = 0; i < M; i++) {
     templates[i] = (char *)(templates + M) + M * i;
+    strcpy(templates[i], "");
   }
 
   int flags[M];
@@ -18,6 +19,7 @@ int main(int argc, char **argv) {
   int count_files = 0;
   for (int i = 0; i < argc; i++) {
     files[i] = (char *)(files + argc) + M * i;
+    strcpy(files[i], "");
   }
 
   handlingArguments(argc, argv, templates, &count_templates, files,
@@ -55,7 +57,7 @@ void handlingArguments(int argc, char **argv, char **templates,
 int str_compare_one_file(regex_t *preg, int preg_cnt, int *flags, FILE *file) {
   int result = 0;
   int str_num = 1;
-  char str[SIZE_STR];
+  char str[SIZE_STR] = "\0";
   if (flags['v'] == 0) {
     while (fgets(str, SIZE_STR, file)) {
       for (int i = 0; i < preg_cnt; ++i) {
@@ -136,6 +138,11 @@ void outputOneFile(char **templates, int count_templates, char **files,
     } else if (flags['c']) {
       printf("%d\n", cnt_comare);
     }
+    fclose(file);
+  }
+
+  for (int i = 0; i < count_templates; i++) {
+    regfree(&preg[i]);
   }
 }
 
@@ -232,7 +239,11 @@ void outputSeveralFile(char **templates, int count_templates, char **files,
       } else if (flags['c']) {
         printf("%s:%d\n", files[i], cnt_comare);
       }
+      fclose(file);
     }
+  }
+  for (int i = 0; i < count_templates; i++) {
+    regfree(&preg[i]);
   }
 }
 
@@ -257,6 +268,7 @@ void allTemplate(int argc, char **argv, char **templates, int *count_templates,
             }
             strcpy(templates[(*count_templates)++], str);
           }
+          fclose(f);
         }
         break;
       case 'i':

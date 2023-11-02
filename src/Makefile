@@ -1,3 +1,5 @@
+all: s21_cat s21_grep
+
 s21_cat:
 	gcc -Wall -Werror -Wextra cat/s21_cat.c -o cat/s21_cat
 

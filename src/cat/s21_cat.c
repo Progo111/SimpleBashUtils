@@ -1,15 +1,19 @@
 #include "s21_cat.h"
 
+void tab_man(char **keys, char *str);
+
 int main(int argc, char **argv) {
   FILE *file = NULL;
   char **keys = malloc(sizeof(char *) * argc + sizeof(char) * argc * M);
   for (int i = 0; i < argc; i++) {
     keys[i] = (char *)(keys + argc) + M * i;
+    strcpy(keys[i], "");
   }
 
   char **files = malloc(sizeof(char *) * argc + sizeof(char) * argc * M);
   for (int i = 0; i < argc; i++) {
     files[i] = (char *)(files + argc) + M * i;
+    strcpy(files[i], "");
   }
 
   handlingArguments(argc, argv, keys, files);
@@ -35,7 +39,6 @@ void str_manipulate(char **keys, char *str, char *str_prev, int *cnt,
           str[l - 1] = '$';
           str[l] = '\n';
           str[l + 1] = '\0';
-          //                    printf("%s", str);
         }
         break;
       case 'n':
@@ -77,21 +80,45 @@ void str_manipulate(char **keys, char *str, char *str_prev, int *cnt,
   }
 }
 
+void tab_man(char **keys, char *str) {
+  int tab_flag = 0;
+  int i = 0;
+  while (strcmp(keys[i], "")) {
+    if (keys[i][0] == 't') {
+      tab_flag = 1;
+    }
+    ++i;
+  }
+  if (tab_flag) {
+    for (size_t i = 0; i < strlen(str); ++i) {
+      if (str[i] == '\t') {
+        printf("^I");
+      } else {
+        printf("%c", str[i]);
+      }
+    }
+  } else {
+    printf("%s", str);
+  }
+}
+
 void file_out(FILE *file, char **keys, char **files) {
   int cnt = 1;
   int cnt_s = 0;
   int i = 0;
   char str_prev[SIZE_STR];
+  strcpy(str_prev, "");
   while (strcmp(files[i], "")) {
     if ((file = fopen(files[i], "r")) == NULL) {
       printf("ERROR\n");
     } else {
-      char str[SIZE_STR];
+      char str[SIZE_STR] = "\0";
       while (fgets(str, SIZE_STR, file)) {
         str_manipulate(keys, str, str_prev, &cnt, &cnt_s);
-        printf("%s", str);
+        tab_man(keys, str);
         strcpy(str_prev, str);
       }
+      fclose(file);
     }
     ++i;
   }
@@ -129,7 +156,7 @@ void handlingArguments(int argc, char **argv, char **keys, char **files) {
   int i = 0;
   for (int k = 0; k < 256; k++) {
     if (arr[k]) {
-      char s[2];
+      char s[1];
       s[0] = k;
       strcpy(keys[i++], s);
     }
